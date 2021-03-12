@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node real-time</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js" integrity="sha512-74AKPNm8Tfd5E9c4otg7XNkIVfIe5ynON7wehpX/9Tv5VYcZvXZBAlcgOAjLHg6HeWyLujisAnle6+iKnyWd9Q==" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <form id="chat">
+        <input type="text" name="username" placeholder="Digite seu usuário">
+        <dic class="messages"></dic>
+        <input type="text" name="message" placeholder="Digite sua mensagem...">
+        <button type="submit">Enviar</button>
+    </form>
+    <script type="text/javascript">
+        // Ouvindo o servidor da aplicação
+        var socket = io('http://localhost:3000')
+        // Definindo função para renderizar mensagens enviadas
+        function renderMessage(message) {
+            // Renderizando a mensagem em tela
+            $('.messages').append('<div class="message"><strong>'+message.author+': </strong>'+message.message+'</div>')
+        }
+        // Recebendo todas as mensagens anteriores, assim que conectado
+        socket.on('previousMessages', function(messages) {
+            for (message of messages) {
+                renderMessage(message)
+            }
+        })
+        // Observando evento emitido pelo servidor com todos os dados das mensagens
+        socket.on('receivedMessage', function(message) {
+            // Renderizando mensagens
+            renderMessage(message)
+        })
+        // Observando todas as vezes que um submit é realizado
+        $('#chat').submit(function(event) {
+            // Impedindo que um submit seja realizado sozinho
+            event.preventDefault()
+            // Capturando os valores de usuário de acordo com os inputs
+            var author = $('input[name=username]').val()
+            var message = $('input[name=message]').val()
+            // Verificando se existem usuários e mensagens digitadas
+            if(author.length && message.length) {
+                // Definindo objeto para ser enviado via web-socket
+                var messageObject = {
+                    author: author,
+                    message: message
+                }
+                // Invocando função para renderizar mensagens
+                renderMessage(messageObject)
+                // Definindo evento de envio das mensagens e seu respectivo objeto
+                socket.emit('sendMessage', messageObject)
+            }
+        })
+    </script>
+</body>
+</html>
