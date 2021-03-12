@@ -1,6 +1,6 @@
 {
   "name": "node-real-time",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple real-time wep app",
   "main": "node server.js",
   "scripts": {
